@@ -20,7 +20,7 @@ fragment
 DIGIT: [0-9];
 
 LowerCaseWord: (LOWER_CASE)+;
-NonAlphanumeric: ~('['|']'|'('|')'|'{'|'}'|':'|'|'|'\n'|[A-Za-z])+;
+NonAlphanumeric: ~('['|']'|'('|')'|'{'|'}'|':'|'|'|'\n'|' '|[A-Za-z])+;
 Identifier: UPPER_CASE (UPPER_CASE|LOWER_CASE|DIGIT)+;
 
 specification
