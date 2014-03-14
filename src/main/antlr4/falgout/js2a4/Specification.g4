@@ -36,15 +36,31 @@ lhs
     ;
 	
 rhs
-    : (NEWLINE syntax+)+
+    : (NEWLINE (syntax|concat))+
     ;
 
 syntax
-    : LEFT_BRACKET syntax+ RIGHT_BRACKET
-    | LEFT_CURLY syntax+ RIGHT_CURLY
-    | LEFT_PARENS syntax+ BAR syntax+ RIGHT_PARENS
+    : optional
+    | closure
+    | union
     | nonTerminal
     | terminal
+    ;
+    
+optional
+    : LEFT_BRACKET (syntax|concat) RIGHT_BRACKET
+    ;
+    
+closure
+    : LEFT_CURLY (syntax|concat) RIGHT_CURLY
+    ;
+    
+union
+    : LEFT_PARENS (syntax|concat) (BAR (syntax|concat))+ RIGHT_PARENS
+    ;
+    
+concat
+    : syntax syntax*
     ;
 	
 nonTerminal
