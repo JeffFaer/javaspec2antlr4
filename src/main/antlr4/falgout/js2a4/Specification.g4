@@ -1,82 +1,99 @@
 grammar Specification;
-	
+
+@members{
+    boolean bar = true;
+    boolean bracket = true;
+}
+
+L_CURLY: '{';
+R_CURLY: '}';
+L_PARENS: '(';
+R_PARENS: ')';
+L_BRACKET: '[';
+R_BRACKET: ']';
 COLON: ':';
-LEFT_BRACKET: '[';
-RIGHT_BRACKET: ']';
-LEFT_CURLY: '{';
-RIGHT_CURLY: '}';
-LEFT_PARENS: '(';
-RIGHT_PARENS: ')';
 BAR: '|';
 NEWLINE: '\n';
+EMPTY_CURLY: '{}';
+EMPTY_PARENS: '()';
+EMPTY_BRACKET: '[]';
 
+Identifier
+    : UPPER_CASE (UPPER_CASE | LOWER_CASE | DIGIT)*
+    ;
+    
+Keyword
+    : LOWER_CASE+
+    ;
+
+WS: [ \t\r]+ -> skip;
+
+Symbols
+    : (~[ A-Za-z0-9])+?
+    ;
+    
 fragment
 UPPER_CASE: [A-Z];
+
 fragment
 LOWER_CASE: [a-z];
+
 fragment
 DIGIT: [0-9];
 
-LowerCaseWord: (LOWER_CASE)+;
-NonAlphanumeric: ~('['|']'|'('|')'|'{'|'}'|':'|'|'|'\n'|' '|[A-Za-z])+;
-Token: UPPER_CASE+;
-Identifier: UPPER_CASE (UPPER_CASE|LOWER_CASE|DIGIT)+;
-
-WS: [ \r\t]+ -> skip;
-
 specification
-    : production (NEWLINE NEWLINE production)* EOF
+    : production (NEWLINE NEWLINE+ production)* NEWLINE* EOF
     ;
-
+    
 production
-    : (NEWLINE? lhs COLON)+ rhs
+    : (lhs COLON NEWLINE)+ rhs (NEWLINE rhs)*
     ;
-
+    
 lhs
     : nonTerminal
     ;
-	
+    
 rhs
-    : (NEWLINE syntax)+
-    ;
-
-syntax
-    : optional syntax?
-    | closure syntax?
-    | union syntax?
-    | terminal syntax?
-    | nonTerminal syntax?
+    : syntax+
     ;
     
-optional
-    : LEFT_BRACKET syntax RIGHT_BRACKET
+syntax
+    : closure
+    | optional
+    | parenthetical
+    | nonTerminal
+    | terminal
     ;
     
 closure
-    : LEFT_CURLY syntax RIGHT_CURLY
+    : L_CURLY syntax+ R_CURLY
+    ;
+    
+optional
+    : L_BRACKET {bracket = false;} syntax+ R_BRACKET {bracket = true;}
+    ;
+    
+parenthetical
+    : union
+    | L_PARENS syntax* R_PARENS
     ;
     
 union
-    : LEFT_PARENS syntax (BAR syntax)+ RIGHT_PARENS
+    : L_PARENS {bar = false;} syntax+ (BAR syntax+)+ R_PARENS {bar = true;}
     ;
-	
+    
 nonTerminal
-	: Identifier
-	| Token
-	;
-	
-terminal
-    : LowerCaseWord
-    | symbol
-    | Token
+    : Identifier
     ;
-
-symbol
-    : NonAlphanumeric
-    | LEFT_BRACKET? RIGHT_BRACKET
-    | LEFT_CURLY RIGHT_CURLY
-    | LEFT_PARENS
-    | RIGHT_PARENS
+    
+terminal
+    : Keyword
+    | Symbols
+    | {bracket}? (L_BRACKET | R_BRACKET)
+    | EMPTY_PARENS
+    | EMPTY_BRACKET
+    | EMPTY_CURLY
+    | BAR BAR
     | COLON
-    | BAR
+    | {bar}? BAR
     ;
