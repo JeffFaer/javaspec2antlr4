@@ -1,7 +1,5 @@
 grammar Specification;
 	
-WS: [ \r\t]+ -> skip;
-
 COLON: ':';
 LEFT_BRACKET: '[';
 RIGHT_BRACKET: ']';
@@ -21,7 +19,10 @@ DIGIT: [0-9];
 
 LowerCaseWord: (LOWER_CASE)+;
 NonAlphanumeric: ~('['|']'|'('|')'|'{'|'}'|':'|'|'|'\n'|' '|[A-Za-z])+;
+Token: UPPER_CASE+;
 Identifier: UPPER_CASE (UPPER_CASE|LOWER_CASE|DIGIT)+;
+
+WS: [ \r\t]+ -> skip;
 
 specification
     : production (NEWLINE NEWLINE production)* EOF
@@ -36,44 +37,38 @@ lhs
     ;
 	
 rhs
-    : (NEWLINE (syntax|concat))+
+    : (NEWLINE syntax)+
     ;
 
 syntax
-    : optional
-    | closure
-    | union
-    | nonTerminal
-    | terminal
+    : optional syntax?
+    | closure syntax?
+    | union syntax?
+    | terminal syntax?
+    | nonTerminal syntax?
     ;
     
 optional
-    : LEFT_BRACKET (syntax|concat) RIGHT_BRACKET
+    : LEFT_BRACKET syntax RIGHT_BRACKET
     ;
     
 closure
-    : LEFT_CURLY (syntax|concat) RIGHT_CURLY
+    : LEFT_CURLY syntax RIGHT_CURLY
     ;
     
 union
-    : LEFT_PARENS (syntax|concat) (BAR (syntax|concat))+ RIGHT_PARENS
-    ;
-    
-concat
-    : syntax syntax*
+    : LEFT_PARENS syntax (BAR syntax)+ RIGHT_PARENS
     ;
 	
 nonTerminal
 	: Identifier
+	| Token
 	;
 	
 terminal
-    : keyword
-    | symbol
-    ;
-
-keyword
     : LowerCaseWord
+    | symbol
+    | Token
     ;
 
 symbol
