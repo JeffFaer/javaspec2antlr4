@@ -1,6 +1,6 @@
 lexer grammar JavaLexer;
 
-/** 3.9 */
+/* 3.9 */
 ABSTRACT: 'abstract';
 ASSERT: 'assert';
 BOOLEAN: 'boolean';
@@ -52,7 +52,7 @@ VOID: 'void';
 VOLATILE: 'volatile';
 WHILE: 'while';
 
-/** 3.10.1 */
+/* 3.10.1 */
 IntegerLiteral
     : DecimalIntegerLiteral
     | HexIntegerLiteral
@@ -153,7 +153,7 @@ BinaryDigit
     : [0-1]
     ;
     
- /** 3.10.2 */
+ /* 3.10.2 */
  FloatingPointLiteral
     : DecimalFloatingPointLiteral
     | HexadecimalFloatingPointLiteral
@@ -213,13 +213,13 @@ BinaryExponentIndicator
     : [pP]
     ;
     
-/** 3.10.3 */
+/* 3.10.3 */
 BooleanLiteral
     : 'true'
     | 'false'
     ;
     
-/** 3.10.4 */
+/* 3.10.4 */
 CharacterLiteral
     : '\'' (SingleCharacter | EscapeSequence) '\''
     ;
@@ -229,7 +229,7 @@ SingleCharacter
     : ~['\\]
     ;
     
-/** 3.10.5 */
+/* 3.10.5 */
 StringLiteral
     : '"' StringCharacter* '"'
     ;
@@ -240,7 +240,7 @@ StringCharacter
     | EscapeSequence
     ;
     
-/** 3.10.6 */
+/* 3.10.6 */
 fragment
 EscapeSequence
     : '\\' [btnfr"'\\]
@@ -259,7 +259,7 @@ NullLiteral
     : 'null'
     ;
     
-/** 3.11 */
+/* 3.11 */
 L_PARENS: '(';
 R_PARENS: ')';
 L_CURLY: '{';
@@ -270,7 +270,7 @@ SEMI: ';';
 COMMA: ',';
 DOT: '.';
 
-/** 3.12 */
+/* 3.12 */
 PLUS_ASSIGN: '+=';
 MINUS_ASSIGN: '-=';
 MULT_ASSIGN: '*=';
@@ -315,7 +315,7 @@ MOD: '%';
 AT: '@';
 ELLIPSES: '...';
 
-/** 3.8 
+/* 3.8 
  * TODO Consider full Unicode
  */
 Identifier

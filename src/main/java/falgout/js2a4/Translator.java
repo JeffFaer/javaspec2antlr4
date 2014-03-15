@@ -2,6 +2,8 @@ package falgout.js2a4;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -14,6 +16,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 import falgout.js2a4.ANTLRv4Parser.GrammarSpecContext;
 import falgout.js2a4.ANTLRv4Parser.LexerRuleContext;
@@ -72,7 +75,7 @@ public class Translator {
                     
                     // This nonTerminal in the Java Spec is actually handled
                     // as a token in the JavaLexer.g4, remove it when we're
-                    // done wlaking the tree
+                    // done walking the tree
                     if (ctx.parent instanceof LhsContext) {
                         remove.add(ctx);
                     }
@@ -99,10 +102,10 @@ public class Translator {
             @Override
             public String visitSpecification(SpecificationContext ctx) {
                 StringBuilder b = new StringBuilder();
-                b.append("parser grammar Java;\n");
+                b.append("parser grammar JavaParser;\n");
                 b.append("\n");
                 b.append("options {\n");
-                b.append(TAB + "tokenVocab=JavaLexer;\n");
+                b.append(TAB + "tokenVocab = JavaLexer;\n");
                 b.append("}\n");
                 b.append("\n");
                 
@@ -113,13 +116,14 @@ public class Translator {
             @Override
             public String visitProduction(ProductionContext ctx) {
                 StringBuilder b = new StringBuilder();
-                String rhs = visitRhs(ctx.rhs());
+                String rhs = join(ctx.rhs(), "\n" + TAB + "| ");
                 
                 Iterator<LhsContext> i = ctx.lhs().iterator();
                 while (i.hasNext()) {
                     b.append(visitLhs(i.next()));
                     b.append("\n" + TAB + ": ");
                     b.append(rhs);
+                    b.append("\n" + TAB + ";");
                     
                     if (i.hasNext()) {
                         b.append("\n");
@@ -132,7 +136,30 @@ public class Translator {
             
             @Override
             public String visitRhs(RhsContext ctx) {
-                return join(ctx.syntax(), "\n" + TAB + "| ") + "\n" + TAB + ";";
+                int symbols = 0;
+                for (SyntaxContext c : ctx.syntax()) {
+                    if (c.terminal() != null && c.terminal().Symbols() != null) {
+                        symbols++;
+                    }
+                }
+                return symbols == ctx.getChildCount() ? getTokenText(ctx.getText()) : super.visitRhs(ctx);
+            }
+            
+            private String getTokenText(String text) {
+                String tokenText = tokens.get(text);
+                if (tokenText == null && text.length() > 1) {
+                    // let's see if each individual character is a token
+                    StringBuilder b = new StringBuilder();
+                    for (int i = 0; i < text.length(); i++) {
+                        if (i > 0) {
+                            b.append(" ");
+                        }
+                        b.append(tokens.get(text.subSequence(i, i + 1)));
+                    }
+                    tokenText = b.toString();
+                }
+                
+                return tokenText;
             }
             
             @Override
@@ -142,47 +169,98 @@ public class Translator {
             
             @Override
             public String visitTerminal(TerminalContext ctx) {
-                String text = ctx.getText();
-                String ret = tokens.get(text);
-                if (ret == null && text.length() > 1) {
-                    // welp, that didn't work. let's try each character
-                    // individually
-                    StringBuilder b = new StringBuilder();
-                    for (int i = 0; i < text.length(); i++) {
-                        if (i > 0) {
-                            b.append(" ");
-                        }
-                        
-                        b.append(tokens.get(text.substring(i, i + 1)));
-                    }
-                    
-                    ret = b.toString();
-                }
-                return ret;
+                return getTokenText(ctx.getText());
+            }
+            
+            @Override
+            public String visitTerminal(TerminalNode node) {
+                return tokens.get(node.getText());
             }
             
             @Override
             public String visitClosure(ClosureContext ctx) {
-                return visitSyntaxElement(ctx.syntax(), "*");
+                ClosureContext ccx = getParent(ctx.parent, ClosureContext.class);
+                if (ccx == null) {
+                    for (String lhs : getLhsNames(ctx)) {
+                        switch (lhs) {
+                        case "block":
+                        case "interfaceBody":
+                        case "annotationTypeBody":
+                        case "classBody":
+                        case "enumBody":
+                        case "elementValueArrayInitializer":
+                        case "arrayInitializer":
+                        case "statement":
+                            StringBuilder b = new StringBuilder();
+                            b.append(tokens.get("{")).append(" ");
+                            b.append(join(ctx.syntax(), " "));
+                            b.append(" ").append(tokens.get("}"));
+                            return b.toString();
+                        }
+                    }
+                }
+                
+                return "(" + join(ctx.syntax(), " ") + ")*";
+            }
+            
+            private <R extends RuleContext> R getParent(RuleContext ctx, Class<R> clazz) {
+                while (ctx != null && !clazz.isInstance(ctx)) {
+                    ctx = ctx.parent;
+                }
+                return ctx == null ? null : clazz.cast(ctx);
+            }
+            
+            private List<String> getLhsNames(RuleContext ctx) {
+                List<String> names = new ArrayList<>();
+                for (LhsContext l : getParent(ctx, ProductionContext.class).lhs()) {
+                    names.add(l.accept(this));
+                }
+                
+                return names;
             }
             
             @Override
             public String visitOptional(OptionalContext ctx) {
-                return visitSyntaxElement(ctx.syntax(), "?");
-            }
-            
-            private String visitSyntaxElement(SyntaxContext ctx, String suffix) {
-                String child = visitSyntax(ctx);
-                StringBuilder b = new StringBuilder("(");
-                b.append(child).append(")").append(suffix);
-                return b.toString();
+                for (String lhs : getLhsNames(ctx)) {
+                    switch (lhs) {
+                    case "selector":
+                        if (ctx.syntax().size() == 1) {
+                            SyntaxContext scx = ctx.syntax(0);
+                            if (scx.nonTerminal() == null || !"expression".equals(scx.nonTerminal().accept(this))) {
+                                break;
+                            }
+                        } else {
+                            break;
+                        }
+                        //$FALL-THROUGH$
+                    case "arrayCreatorRest":
+                        StringBuilder b = new StringBuilder();
+                        b.append(tokens.get("[")).append(" ");
+                        b.append(join(ctx.syntax(), " "));
+                        b.append(" ").append(tokens.get("]"));
+                        
+                        return b.toString();
+                    }
+                }
+                return "(" + join(ctx.syntax(), " ") + ")?";
             }
             
             @Override
             public String visitUnion(UnionContext ctx) {
                 StringBuilder b = new StringBuilder("(");
-                b.append(join(ctx.syntax(), " | ")).append(")");
-                return b.toString();
+                for (int i = 1; i < ctx.getChildCount() - 1; i++) {
+                    if (i > 1) {
+                        b.append(" ");
+                    }
+                    
+                    ParseTree p = ctx.getChild(i);
+                    if (p instanceof TerminalNode) {
+                        b.append("|");
+                    } else {
+                        b.append(ctx.getChild(i).accept(this));
+                    }
+                }
+                return b.append(")").toString();
             }
             
             @Override
@@ -221,8 +299,8 @@ public class Translator {
                 if (tokens == null) {
                     tokens = new LinkedHashMap<>();
                     
-                    ANTLRv4Lexer lex = new ANTLRv4Lexer(new ANTLRInputStream(getClass().getClassLoader()
-                            .getResourceAsStream("JavaLexer.g4")));
+                    ANTLRv4Lexer lex = new ANTLRv4Lexer(new ANTLRFileStream(
+                            "src/main/antlr4/falgout/js2a4/JavaLexer.g4"));
                     ANTLRv4Parser parse = new ANTLRv4Parser(new CommonTokenStream(lex));
                     GrammarSpecContext g = parse.grammarSpec();
                     
@@ -250,6 +328,8 @@ public class Translator {
     }
     
     public static void main(String[] args) throws IOException {
-        System.out.println(new Translator(args).translate());
+        String f = new Translator(args).translate();
+        System.out.println(f);
+        Files.write(Paths.get("src/main/antlr4/falgout/js2a4/JavaParser.g4"), f.getBytes());
     }
 }
