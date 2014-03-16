@@ -94,7 +94,8 @@ DecimalNumeral
     
 fragment
 Digits
-    : (Digit | '_')+
+    : Digit
+    | Digit (Digit | '_')* Digit
     ;
     
 fragment
@@ -165,6 +166,7 @@ DecimalFloatingPointLiteral
     | '.' Digits ExponentPart? FloatTypeSuffix?
     | Digits ExponentPart FloatTypeSuffix?
     | Digits ExponentPart FloatTypeSuffix?
+    | Digits FloatTypeSuffix
     ;
     
 fragment
@@ -292,8 +294,6 @@ L_OR: '||';
 INCREMENT: '++';
 DECREMENT: '--';
 L_SHIFT: '<<';
-R_SHIFT: '>>';
-UR_SHIFT: '>>>';
 
 ASSIGN: '=';
 LT: '<';
