@@ -247,6 +247,7 @@ fragment
 EscapeSequence
     : '\\' [btnfr"'\\]
     | OctalEscape
+    | UnicodeEscape
     ;
     
 fragment
@@ -254,6 +255,11 @@ OctalEscape
     : '\\' OctalDigit
     | '\\' OctalDigit OctalDigit
     | '\\' [0-3] OctalDigit OctalDigit
+    ;
+    
+fragment
+UnicodeEscape
+    : '\\' 'u'+ HexDigit HexDigit HexDigit HexDigit
     ;
     
 /** 3.10.7 */
