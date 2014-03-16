@@ -46,7 +46,7 @@ public class TranslatorTest {
                             JavaLexer lex = new JavaLexer(new ANTLRInputStream(file));
                             JavaParser2 parse = new JavaParser2(new CommonTokenStream(lex));
                             parse.setErrorHandler(new BailErrorStrategy());
-                            
+
                             System.out.println("Starting              " + name);
                             parse.compilationUnit();
                             int c = complete.incrementAndGet();

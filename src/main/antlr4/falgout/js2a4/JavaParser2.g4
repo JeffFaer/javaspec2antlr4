@@ -79,7 +79,7 @@ referenceType
 typeArguments
     : LT typeArgument (COMMA typeArgument)* GT
     ;
-  
+
 typeArgument
     : referenceType
     | QUES ((EXTENDS | SUPER) referenceType)?
