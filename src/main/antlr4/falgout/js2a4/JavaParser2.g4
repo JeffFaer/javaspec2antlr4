@@ -56,8 +56,8 @@ annotationTypeDeclaration
     ;
 
 type
-    : basicType (L_BRACKET R_BRACKET)*
-    | referenceType (L_BRACKET R_BRACKET)*
+    : basicType
+    | referenceType
     ;
 
 basicType
