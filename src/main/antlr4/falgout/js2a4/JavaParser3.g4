@@ -512,7 +512,7 @@ parExpression
     ;
 
 arguments
-    : L_PARENS (expression (COMMA expression)*)? R_PARENS
+    : L_PARENS expressionList? R_PARENS
     ;
 
 superSuffix
