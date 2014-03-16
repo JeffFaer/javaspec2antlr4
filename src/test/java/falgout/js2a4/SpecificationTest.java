@@ -8,7 +8,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
@@ -20,16 +20,15 @@ import falgout.js2a4.SpecificationParser.SpecificationContext;
 public class SpecificationTest {
     @Test
     public void parsingDoesNotLoseInformation() throws IOException, URISyntaxException {
-        ClassLoader cl = getClass().getClassLoader();
         String resource = "provided_java";
         
         StringBuilder expected = new StringBuilder();
-        for (String line : Files.readAllLines(Paths.get(cl.getResource(resource).toURI()), Charset.defaultCharset())) {
+        for (String line : Files.readAllLines(Paths.get(resource), Charset.defaultCharset())) {
             expected.append(line.replaceAll("( |\t)+", ""));
             expected.append("\n");
         }
         
-        SpecificationLexer lex = new SpecificationLexer(new ANTLRInputStream(cl.getResourceAsStream(resource)));
+        SpecificationLexer lex = new SpecificationLexer(new ANTLRFileStream(resource));
         SpecificationParser parser = new SpecificationParser(new CommonTokenStream(lex));
         SpecificationContext spec = parser.specification();
         
