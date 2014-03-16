@@ -27,7 +27,7 @@ public class TranslatorTest {
             byte[] buf = new byte[1024 * 8];
             ExecutorService runner = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
             Queue<Future<String>> tasks = new ArrayDeque<>();
-           
+            
             while ((e = src.getNextEntry()) != null) {
                 final String name = e.getName();
                 if (name.endsWith(".java")) {
@@ -43,6 +43,8 @@ public class TranslatorTest {
                             JavaLexer lex = new JavaLexer(new ANTLRInputStream(file));
                             JavaParser2 parse = new JavaParser2(new CommonTokenStream(lex));
                             parse.setErrorHandler(new BailErrorStrategy());
+                            
+                            System.out.println("Starting " + name);
                             
                             parse.compilationUnit();
                             return name;
