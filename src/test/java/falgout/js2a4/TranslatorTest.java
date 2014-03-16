@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -19,7 +20,7 @@ import org.junit.Test;
 
 public class TranslatorTest {
     @Test
-    public void translationCanParseJDK() throws InterruptedException, ExecutionException, IOException {
+    public void translationCanParseJDK() throws IOException, InterruptedException, ExecutionException {
         ClassLoader cl = getClass().getClassLoader();
         
         try (ZipInputStream src = new ZipInputStream(cl.getResourceAsStream("src.zip"))) {
@@ -27,6 +28,8 @@ public class TranslatorTest {
             byte[] buf = new byte[1024 * 8];
             ExecutorService runner = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
             Queue<Future<String>> tasks = new ArrayDeque<>();
+            final AtomicInteger total = new AtomicInteger();
+            final AtomicInteger complete = new AtomicInteger();
             
             while ((e = src.getNextEntry()) != null) {
                 final String name = e.getName();
@@ -44,17 +47,21 @@ public class TranslatorTest {
                             JavaParser2 parse = new JavaParser2(new CommonTokenStream(lex));
                             parse.setErrorHandler(new BailErrorStrategy());
                             
-                            System.out.println("Starting " + name);
-                            
+                            System.out.println("Starting              " + name);
                             parse.compilationUnit();
+                            int c = complete.incrementAndGet();
+                            int t = total.get();
+                            double percent = 100 * c / (double) t;
+                            System.out.printf("Done (%d/%d : %.2f%%) %s\n", c, t, percent, name);
                             return name;
                         }
                     }));
+                    total.incrementAndGet();
                 }
             }
-            int num = 0;
-            while (!tasks.isEmpty()) {
-                System.out.println(++num + " " + tasks.poll().get());
+            
+            for (Future<String> f : tasks) {
+                f.get();
             }
         }
     }
