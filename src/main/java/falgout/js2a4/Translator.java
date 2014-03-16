@@ -277,7 +277,7 @@ public class Translator {
         return toString.visit(spec);
     }
     
-    private Map<String, String> tokens;
+    private volatile Map<String, String> tokens;
     
     // pull tokens from JavaLexer.g4
     // constant tokens are also put in as a reverse mapping (rule -> token name)
