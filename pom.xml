@@ -5,6 +5,11 @@
 	<groupId>falgout.js2a4</groupId>
 	<artifactId>js2a4</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.antlr</groupId>
@@ -25,6 +30,7 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	
 	<build>
 		<resources>
 			<resource>
@@ -37,6 +43,7 @@
 				</excludes>
 			</resource>
 		</resources>
+		
 		<plugins>
 			<plugin>
 				<groupId>org.antlr</groupId>
@@ -63,6 +70,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
+		
 		<pluginManagement>
 			<plugins>
 				<!--This plugin's configuration is used to store Eclipse m2e settings 
