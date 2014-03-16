@@ -116,7 +116,8 @@ HexNumeral
     
 fragment
 HexDigits
-    : HexDigit (HexDigit | '_')*
+    : HexDigit
+    | HexDigit (HexDigit | '_')* HexDigit
     ;
     
 fragment
@@ -131,7 +132,8 @@ OctalNumeral
     
 fragment
 OctalDigits
-    : (OctalDigit | '_')+
+    : OctalDigit
+    | OctalDigit (OctalDigit | '_')* OctalDigit
     ;
     
 fragment
@@ -146,7 +148,8 @@ BinaryNumeral
     
 fragment
 BinaryDigits
-    : BinaryDigit (BinaryDigit | '_')*
+    : BinaryDigit
+    | BinaryDigit (BinaryDigit | '_')* BinaryDigit
     ;
     
 fragment
