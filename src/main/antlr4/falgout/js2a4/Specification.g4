@@ -28,8 +28,8 @@ Keyword
 
 WS: [ \t\r]+ -> skip;
 
-Symbols
-    : (~[ A-Za-z0-9])+?
+Symbol
+    : ~[ A-Za-z0-9]
     ;
     
 fragment
@@ -88,12 +88,21 @@ nonTerminal
     
 terminal
     : Keyword
-    | Symbols
-    | {bracket}? (L_BRACKET | R_BRACKET)
+    | symbols
+    | {bracket}? L_BRACKET
+    ;
+    
+symbols
+    : symbol+
+    ;
+    
+ symbol
+    : Symbol
+    | COLON
+    | BAR BAR
     | EMPTY_PARENS
     | EMPTY_BRACKET
     | EMPTY_CURLY
-    | BAR BAR
-    | COLON
     | {bar}? BAR
+    | {bracket}? R_BRACKET
     ;

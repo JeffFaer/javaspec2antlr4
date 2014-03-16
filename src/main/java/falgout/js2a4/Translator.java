@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -17,6 +18,7 @@ import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.antlr.v4.runtime.tree.gui.TreeViewer;
 
 import falgout.js2a4.ANTLRv4Parser.GrammarSpecContext;
 import falgout.js2a4.ANTLRv4Parser.LexerRuleContext;
@@ -26,7 +28,6 @@ import falgout.js2a4.SpecificationParser.LhsContext;
 import falgout.js2a4.SpecificationParser.NonTerminalContext;
 import falgout.js2a4.SpecificationParser.OptionalContext;
 import falgout.js2a4.SpecificationParser.ProductionContext;
-import falgout.js2a4.SpecificationParser.RhsContext;
 import falgout.js2a4.SpecificationParser.SpecificationContext;
 import falgout.js2a4.SpecificationParser.SyntaxContext;
 import falgout.js2a4.SpecificationParser.TerminalContext;
@@ -132,17 +133,6 @@ public class Translator {
                 }
                 
                 return b.toString();
-            }
-            
-            @Override
-            public String visitRhs(RhsContext ctx) {
-                int symbols = 0;
-                for (SyntaxContext c : ctx.syntax()) {
-                    if (c.terminal() != null && c.terminal().Symbols() != null) {
-                        symbols++;
-                    }
-                }
-                return symbols == ctx.getChildCount() ? getTokenText(ctx.getText()) : super.visitRhs(ctx);
             }
             
             private String getTokenText(String text) {
