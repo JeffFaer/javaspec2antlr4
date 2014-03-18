@@ -303,6 +303,9 @@ L_OR: '||';
 INCREMENT: '++';
 DECREMENT: '--';
 L_SHIFT: '<<';
+ARROW: '->';
+METHOD_REF: '::';
+DIAMOND: '<>';
 
 ASSIGN: '=';
 LT: '<';
@@ -328,7 +331,18 @@ ELLIPSES: '...';
  * TODO Consider full Unicode
  */
 Identifier
-    : JavaLetter (JavaLetter | JavaDigit)*
+    : IdentifierChars
+    ;
+    
+fragment
+IdentifierChars
+    : JavaLetter (JavaLetterOrDigit)*
+    ;
+    
+fragment
+JavaLetterOrDigit
+    : JavaLetter
+    | JavaDigit
     ;
     
 fragment
