@@ -35,25 +35,25 @@ public class TranslatorTest {
         ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         try (ZipInputStream src = new ZipInputStream(cl.getResourceAsStream("src.zip"))) {
             ExecutorCompletionService<Void> runner = new ExecutorCompletionService<>(executor);
-            
-            final AtomicInteger total = new AtomicInteger();
-            final AtomicInteger complete = new AtomicInteger();
-            final AtomicLong totalTime = new AtomicLong();
+
+            AtomicInteger total = new AtomicInteger();
+            AtomicInteger complete = new AtomicInteger();
+            AtomicLong totalTime = new AtomicLong();
             
             Map<Future<Void>, String> tasks = new LinkedHashMap<>();
-            final Set<String> processing = new CopyOnWriteArraySet<>();
+            Set<String> processing = new CopyOnWriteArraySet<>();
             
             byte[] buf = new byte[1024 * 8];
             ZipEntry e;
             while ((e = src.getNextEntry()) != null) {
-                final String name = e.getName();
+                String name = e.getName();
                 if (name.endsWith(".java")) {
                     ByteArrayOutputStream sink = new ByteArrayOutputStream((int) e.getSize());
                     int read;
                     while ((read = src.read(buf)) > 0) {
                         sink.write(buf, 0, read);
                     }
-                    final String file = new String(sink.toByteArray());
+                    String file = new String(sink.toByteArray());
                     tasks.put(runner.submit(new Callable<Void>() {
                         @Override
                         public Void call() throws Exception {
@@ -93,8 +93,12 @@ public class TranslatorTest {
                     System.err.println("Failed " + tasks.get(f));
                 }
             }
+
+            double percentFailed = 100 * failed.size() / (double) total.get();
             
             System.out.printf("Done in %.2f seconds\n", totalTime.get() / 10e9);
+            System.out.printf("Compiled %d (%.2f%%)\n", total.get() - failed.size(), 100 - percentFailed);
+            System.out.printf("Failed %d (%.2f%%)\n", failed.size(), percentFailed);
             
             if (failed.size() > 0) {
                 System.out.println(failed);
