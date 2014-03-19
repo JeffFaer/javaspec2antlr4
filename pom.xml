@@ -23,13 +23,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.antlr</groupId>
-			<artifactId>antlr4</artifactId>
-			<version>4.2</version>
-			<classifier>complete</classifier>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.jsoup</groupId>
 			<artifactId>jsoup</artifactId>
 			<version>1.7.3</version>
