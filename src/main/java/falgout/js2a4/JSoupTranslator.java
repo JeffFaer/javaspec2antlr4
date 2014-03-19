@@ -31,18 +31,18 @@ import falgout.js2a4.SpecificationParser.RhsContext;
 
 public class JSoupTranslator {
     private static final String TAB = "    ";
-
+    
     private final Map<String, String> tokens;
     private final String file;
-
+    
     public JSoupTranslator(String file) throws IOException {
         this.file = file;
         tokens = new LinkedHashMap<>();
-        
+
         ANTLRv4Lexer lex = new ANTLRv4Lexer(new ANTLRFileStream("src/main/antlr4/falgout/js2a4/JavaLexer.g4"));
         ANTLRv4Parser parse = new ANTLRv4Parser(new CommonTokenStream(lex));
         GrammarSpecContext g = parse.grammarSpec();
-        
+
         for (RuleSpecContext r : g.rules().ruleSpec()) {
             LexerRuleContext l = r.lexerRule();
             String left = l.TOKEN_REF().getText();
@@ -62,7 +62,7 @@ public class JSoupTranslator {
             }
         }
     }
-
+    
     public String translate() throws IOException {
         StringBuilder b = new StringBuilder();
         b.append("parser grammar JavaParser;\n");
@@ -70,15 +70,22 @@ public class JSoupTranslator {
         b.append("options {\n");
         b.append(TAB).append("tokenVocab = JavaLexer;\n");
         b.append("}\n");
-        b.append("\n");
-
+        b.append("\n" + "packageName\n" + "    : Identifier (DOT Identifier)*\n" + "    ;\n" + "    \n" + "typeName\n"
+                + "    : Identifier\n" + "    | packageOrTypeName DOT Identifier\n" + "    ;\n" + "    \n"
+                + "packageOrTypeName\n" + "    : Identifier (DOT Identifier)*\n" + "    ;\n" + "    \n"
+                + "expressionName\n" + "    : Identifier\n" + "    | ambiguousName DOT Identifier\n" + "    ;\n"
+                + "    \n" + "methodName\n" + "    : Identifier\n" + "    ;\n" + "    \n" + "ambiguousName\n"
+                + "    : Identifier (DOT Identifier)*\n" + "    ;\n" + "    \n" + "simpleTypeName\n"
+                + "    : Identifier\n" + "    ;\n" + "    \n" + "typeParameterModifier\n" + "    : annotation\n"
+                + "    ;\n\n");
+        
         Document doc = Jsoup.parse(new File(file), Charset.defaultCharset().name());
         List<Element> productions = doc.getElementsByClass("production");
-
+        
         for (Element production : productions) {
             Element lhs = production.getElementsByClass("lhs").get(0);
             Element rhs = production.getElementsByClass("rhs").get(0);
-
+            
             String left = parseLhs(lhs);
             if (left != null) {
                 b.append(left).append("\n");
@@ -87,17 +94,17 @@ public class JSoupTranslator {
                 b.append("\n");
             }
         }
-
+        
         return b.toString().trim();
     }
-
+    
     private String parseLhs(Element lhs) {
         String id = lhs.text();
         id = id.substring(0, id.length() - 1);
-
+        
         return tokens.containsKey(id) ? null : getRuleName(id);
     }
-
+    
     private String getRuleName(String text) {
         if (tokens.containsKey(text)) {
             return text;
@@ -109,16 +116,16 @@ public class JSoupTranslator {
             return ruleName;
         }
     }
-
+    
     private String getTokenName(String text) {
         String token = tokens.get(text);
         if (token == null) {
             token = text.chars().mapToObj(i -> String.valueOf((char) i)).map(s -> tokens.get(s)).collect(joining(" "));
         }
-
+        
         return token;
     }
-    
+
     private String parseRhs(String lhs, Element rhs) {
         String newline = "\n" + TAB + "| ";
         switch (lhs) {
@@ -139,26 +146,26 @@ public class JSoupTranslator {
             for (Element e : rhs.getElementsByTag("code")) {
                 e.replaceWith(new TextNode(getTokenName(e.text()), null));
             }
-
+            
             SpecificationLexer lex = new SpecificationLexer(new ANTLRInputStream(rhs.text()));
             SpecificationParser parser = new SpecificationParser(new CommonTokenStream(lex));
-            
+
             SpecificationVisitor<String> toString = new SpecificationBaseVisitor<String>() {
                 @Override
                 public String visitClosure(ClosureContext ctx) {
                     return "(" + ctx.syntax().accept(this) + ")*";
                 }
-
+                
                 @Override
                 public String visitOptional(OptionalContext ctx) {
                     return "(" + ctx.syntax().accept(this) + ")?";
                 }
-
+                
                 @Override
                 public String visitTerminal(TerminalNode node) {
                     return getRuleName(node.getText());
                 }
-
+                
                 @Override
                 protected String aggregateResult(String aggregate, String nextResult) {
                     if (aggregate == null) {
@@ -183,7 +190,7 @@ public class JSoupTranslator {
             return parsed.syntax().stream().map(ctx -> ctx.accept(toString)).collect(joining(newline));
         }
     }
-
+    
     public static void main(String[] args) throws IOException {
         String f = new JSoupTranslator("provided_java").translate();
         System.out.println(f);

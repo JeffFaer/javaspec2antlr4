@@ -4,6 +4,40 @@ options {
     tokenVocab = JavaLexer;
 }
 
+packageName
+    : Identifier (DOT Identifier)*
+    ;
+    
+typeName
+    : Identifier
+    | packageOrTypeName DOT Identifier
+    ;
+    
+packageOrTypeName
+    : Identifier (DOT Identifier)*
+    ;
+    
+expressionName
+    : Identifier
+    | ambiguousName DOT Identifier
+    ;
+    
+methodName
+    : Identifier
+    ;
+    
+ambiguousName
+    : Identifier (DOT Identifier)*
+    ;
+    
+simpleTypeName
+    : Identifier
+    ;
+    
+typeParameterModifier
+    : annotation
+    ;
+
 literal
     : IntegerLiteral
     | FloatingPointLiteral
