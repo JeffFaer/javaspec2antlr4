@@ -70,14 +70,41 @@ public class JSoupTranslator {
         b.append("options {\n");
         b.append(TAB).append("tokenVocab = JavaLexer;\n");
         b.append("}\n");
-        b.append("\n" + "packageName\n" + "    : Identifier (DOT Identifier)*\n" + "    ;\n" + "    \n" + "typeName\n"
-                + "    : Identifier\n" + "    | packageOrTypeName DOT Identifier\n" + "    ;\n" + "    \n"
-                + "packageOrTypeName\n" + "    : Identifier (DOT Identifier)*\n" + "    ;\n" + "    \n"
-                + "expressionName\n" + "    : Identifier\n" + "    | ambiguousName DOT Identifier\n" + "    ;\n"
-                + "    \n" + "methodName\n" + "    : Identifier\n" + "    ;\n" + "    \n" + "ambiguousName\n"
-                + "    : Identifier (DOT Identifier)*\n" + "    ;\n" + "    \n" + "simpleTypeName\n"
-                + "    : Identifier\n" + "    ;\n" + "    \n" + "typeParameterModifier\n" + "    : annotation\n"
-                + "    ;\n\n");
+        b.append("\n");
+        // Add missing declarations
+        b.append("packageName\n");
+        b.append(TAB).append(": Identifier (DOT Identifier)*\n");
+        b.append(TAB).append(";\n");
+        b.append(TAB).append("\n");
+        b.append("typeName\n");
+        b.append(TAB).append(": Identifier\n");
+        b.append(TAB).append("| packageOrTypeName DOT Identifier\n");
+        b.append(TAB).append(";\n");
+        b.append(TAB).append("\n");
+        b.append("packageOrTypeName\n");
+        b.append(TAB).append(": Identifier (DOT Identifier)*\n");
+        b.append(TAB).append(";\n");
+        b.append(TAB).append("\n");
+        b.append("expressionName\n");
+        b.append(TAB).append(": Identifier\n");
+        b.append(TAB).append("| ambiguousName DOT Identifier\n");
+        b.append(TAB).append(";\n");
+        b.append(TAB).append("\n");
+        b.append("methodName\n");
+        b.append(TAB).append(": Identifier\n");
+        b.append(TAB).append(";\n");
+        b.append(TAB).append("\n");
+        b.append("ambiguousName\n");
+        b.append(TAB).append(": Identifier (DOT Identifier)*\n");
+        b.append(TAB).append(";\n");
+        b.append(TAB).append("\n");
+        b.append("simpleTypeName\n");
+        b.append(TAB).append(": Identifier\n");
+        b.append(TAB).append(";\n");
+        b.append(TAB).append("\n");
+        b.append("typeParameterModifier\n");
+        b.append(TAB).append(": annotation\n");
+        b.append(TAB).append(";\n\n");
         
         Document doc = Jsoup.parse(new File(file), Charset.defaultCharset().name());
         List<Element> productions = doc.getElementsByClass("production");
