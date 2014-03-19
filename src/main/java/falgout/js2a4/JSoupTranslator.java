@@ -174,47 +174,65 @@ public class JSoupTranslator {
                 e.replaceWith(new TextNode(getTokenName(e.text()), null));
             }
             
-            SpecificationLexer lex = new SpecificationLexer(new ANTLRInputStream(rhs.text()));
-            SpecificationParser parser = new SpecificationParser(new CommonTokenStream(lex));
-
-            SpecificationVisitor<String> toString = new SpecificationBaseVisitor<String>() {
-                @Override
-                public String visitClosure(ClosureContext ctx) {
-                    return "(" + ctx.syntax().accept(this) + ")*";
-                }
-                
-                @Override
-                public String visitOptional(OptionalContext ctx) {
-                    return "(" + ctx.syntax().accept(this) + ")?";
-                }
-                
-                @Override
-                public String visitTerminal(TerminalNode node) {
-                    return getRuleName(node.getText());
-                }
-                
-                @Override
-                protected String aggregateResult(String aggregate, String nextResult) {
-                    if (aggregate == null) {
-                        return nextResult;
+            if (lhs.contains("Modifier")) {
+                return rhs.textNodes().stream().map(t -> {
+                    String text = t.text();
+                    return text.equals("|") || text.trim().length() == 0 ? "" : text;
+                }).reduce("", (s1, s2) -> {
+                    if (s2.isEmpty()) {
+                        return s1;
                     } else {
-                        return aggregate + " " + nextResult;
+                        StringBuilder b = new StringBuilder();
+                        b.append(s1);
+                        if (!s1.isEmpty()) {
+                            b.append(newline);
+                        }
+                        return b.append(s2).toString();
                     }
-                }
-            };
-            RhsContext parsed = parser.rhs();
-            Iterator<ParseTree> i = parsed.children.iterator();
-            while (i.hasNext()) {
-                ParseTree t = i.next();
-                if (t instanceof TerminalNode) {
-                    if (((TerminalNode) t).getSymbol().getType() == SpecificationParser.BAR) {
-                        if (i.next().getText().length() == 0) {
-                            i.remove();
+                });
+            } else {
+                SpecificationLexer lex = new SpecificationLexer(new ANTLRInputStream(rhs.text()));
+                SpecificationParser parser = new SpecificationParser(new CommonTokenStream(lex));
+
+                SpecificationVisitor<String> toString = new SpecificationBaseVisitor<String>() {
+                    @Override
+                    public String visitClosure(ClosureContext ctx) {
+                        return "(" + ctx.syntax().accept(this) + ")*";
+                    }
+
+                    @Override
+                    public String visitOptional(OptionalContext ctx) {
+                        return "(" + ctx.syntax().accept(this) + ")?";
+                    }
+
+                    @Override
+                    public String visitTerminal(TerminalNode node) {
+                        return getRuleName(node.getText());
+                    }
+
+                    @Override
+                    protected String aggregateResult(String aggregate, String nextResult) {
+                        if (aggregate == null) {
+                            return nextResult;
+                        } else {
+                            return aggregate + " " + nextResult;
+                        }
+                    }
+                };
+                RhsContext parsed = parser.rhs();
+                Iterator<ParseTree> i = parsed.children.iterator();
+                while (i.hasNext()) {
+                    ParseTree t = i.next();
+                    if (t instanceof TerminalNode) {
+                        if (((TerminalNode) t).getSymbol().getType() == SpecificationParser.BAR) {
+                            if (i.next().getText().length() == 0) {
+                                i.remove();
+                            }
                         }
                     }
                 }
+                return parsed.syntax().stream().map(ctx -> ctx.accept(toString)).collect(joining(newline));
             }
-            return parsed.syntax().stream().map(ctx -> ctx.accept(toString)).collect(joining(newline));
         }
     }
     

@@ -195,8 +195,14 @@ normalClassDeclaration
     ;
 
 classModifier
-    : annotation PUBLIC PROTECTED PRIVATE
-    | ABSTRACT STATIC FINAL STRICTFP
+    : annotation
+    | PUBLIC
+    | PROTECTED
+    | PRIVATE
+    | ABSTRACT
+    | STATIC
+    | FINAL
+    | STRICTFP
     ;
 
 typeParameters
@@ -243,8 +249,14 @@ fieldDeclaration
     ;
 
 fieldModifier
-    : annotation PUBLIC PROTECTED PRIVATE
-    | STATIC FINAL TRANSIENT VOLATILE
+    : annotation
+    | PUBLIC
+    | PROTECTED
+    | PRIVATE
+    | STATIC
+    | FINAL
+    | TRANSIENT
+    | VOLATILE
     ;
 
 variableDeclaratorList
@@ -309,8 +321,16 @@ methodDeclaration
     ;
 
 methodModifier
-    : annotation PUBLIC PROTECTED PRIVATE
-    | ABSTRACT STATIC FINAL SYNCHRONIZED NATIVE STRICTFP
+    : annotation
+    | PUBLIC
+    | PROTECTED
+    | PRIVATE
+    | ABSTRACT
+    | STATIC
+    | FINAL
+    | SYNCHRONIZED
+    | NATIVE
+    | STRICTFP
     ;
 
 methodHeader
@@ -342,7 +362,8 @@ formalParameter
     ;
 
 variableModifier
-    : annotation FINAL
+    : annotation
+    | FINAL
     ;
 
 lastFormalParameter
@@ -385,7 +406,10 @@ constructorDeclaration
     ;
 
 constructorModifier
-    : annotation PUBLIC PROTECTED PRIVATE
+    : annotation
+    | PUBLIC
+    | PROTECTED
+    | PRIVATE
     ;
 
 constructorDeclarator
@@ -437,8 +461,13 @@ normalInterfaceDeclaration
     ;
 
 interfaceModifier
-    : annotation PUBLIC PROTECTED PRIVATE
-    | ABSTRACT STATIC STRICTFP
+    : annotation
+    | PUBLIC
+    | PROTECTED
+    | PRIVATE
+    | ABSTRACT
+    | STATIC
+    | STRICTFP
     ;
 
 extendsInterfaces
@@ -462,8 +491,10 @@ constantDeclaration
     ;
 
 constantModifier
-    : annotation PUBLIC
-    | STATIC FINAL
+    : annotation
+    | PUBLIC
+    | STATIC
+    | FINAL
     ;
 
 interfaceMethodDeclaration
@@ -471,8 +502,12 @@ interfaceMethodDeclaration
     ;
 
 interfaceMethodModifier
-    : annotation PUBLIC
-    | ABSTRACT DEFAULT STATIC STRICTFP
+    : annotation
+    | PUBLIC
+    | ABSTRACT
+    | DEFAULT
+    | STATIC
+    | STRICTFP
     ;
 
 annotationTypeDeclaration
@@ -496,7 +531,8 @@ annotationTypeElementDeclaration
     ;
 
 annotationTypeElementModifier
-    : annotation PUBLIC
+    : annotation
+    | PUBLIC
     | ABSTRACT
     ;
 
